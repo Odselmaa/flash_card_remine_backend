@@ -29,6 +29,11 @@ def hello_world():
         return cards
 
 
+@app.route('/')
+def hello_world():
+    return "Hey cutie"
+
+
 
 if __name__ == '__main__':
     app.run()
