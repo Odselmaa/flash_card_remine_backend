@@ -1,1 +1,1 @@
-web: gunicorn rock_it_babe:app
+web: gunicorn app:app
