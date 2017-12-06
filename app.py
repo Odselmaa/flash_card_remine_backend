@@ -74,9 +74,12 @@ def collection():
 def user():
     if request.method == POST:
         user_json = request.json
-        user = User(**user_json)
-        return jsonify({"user_id": str(user.pk)})
-
+        if len(User.objects(email=user_json["email"]))==0:
+            user = User(**user_json)
+            user.save()
+            return jsonify({"user_id": str(user.pk)})
+        else:
+            return jsonify({"error": "User is already registered"})
 
 def send_request(URL, method, json):
     result = {}
