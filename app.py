@@ -74,8 +74,8 @@ def collection():
 def user():
     if request.method == POST:
         user_json = request.json
-        # user = User(**user_json)
-        return jsonify({"user_id": "bla"})
+        user = User(**user_json)
+        return jsonify({"user_id": str(user.pk)})
 
 
 def send_request(URL, method, json):
