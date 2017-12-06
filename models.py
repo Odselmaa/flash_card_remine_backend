@@ -8,6 +8,7 @@ db = MongoEngine()
 
 
 class Card(Document):
+    # _id = StringField(primary_key=True)
     translation = StringField(required=True)
     original = StringField(required=True)
 
@@ -19,8 +20,9 @@ class Collection(Document):
 
 
 class User(Document):
-    username = StringField(required=True)
+    name = StringField(required=True)
     password = StringField()
+    email = EmailField(required=True)
     favorites = ListField(ReferenceField(Collection))
     collections = ListField(ReferenceField(Collection))
 
