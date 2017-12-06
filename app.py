@@ -77,7 +77,7 @@ def user():
         if len(User.objects(email=user_json["email"]))==0:
             user = User(**user_json)
             user.save()
-            return jsonify({"user_id": str(user.pk)})
+            return jsonify({"user_id": str(user.pk), "success":"Successfully"}), 200
         else:
             return jsonify({"error": "User is already registered"})
 
