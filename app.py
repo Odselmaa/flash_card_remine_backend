@@ -102,7 +102,7 @@ def user():
 
         if is_valid_email(user_or_name):
             user = User.objects(email=user_or_name, password=password).first()
-            if user is not None:
+            if user is None:
                 return jsonify({"error": "User not found, check your information"})
             else:
                 return jsonify({"success": "Successfully, logged", "user_id": str(user.pk)})
