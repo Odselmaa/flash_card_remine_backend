@@ -6,6 +6,7 @@ from werkzeug.exceptions import InternalServerError, BadRequest
 
 from models import db, Card, Collection, User
 import requests
+import re
 
 app = Flask(__name__)
 POST = "POST"
@@ -67,19 +68,47 @@ def collection():
 
         user_id = data["user_id"]
         updated = User.objects(id=ObjectId(user_id)).update_one(push__collections=collection.pk)
-        return jsonify({"collection_id": str(collection.pk), "update":updated})
+        return jsonify({"collection_id": str(collection.pk), "update": updated})
+
+
+def is_valid_email(email):
+    if len(email) > 7:
+        if re.match("^.+@([?)[a-zA-Z0-9-.]+.([a-zA-Z]{2,3}|[0-9]{1,3})(]?)$", email) != None:
+            return True
+    return False
+
+    # if isValidEmail("my.email@gmail.com") == True:
+    #     print
+    #     "This is a valid email address"
+    # else:
+    #     print
+    #     "This is not a valid email address"
 
 
 @app.route('/user', methods=[POST, GET])
 def user():
     if request.method == POST:
         user_json = request.json
-        if len(User.objects(email=user_json["email"]))==0:
+        if len(User.objects(email=user_json["email"])) == 0:
             user = User(**user_json)
             user.save()
-            return jsonify({"user_id": str(user.pk), "success":"Successfully"}), 200
+            return jsonify({"user_id": str(user.pk), "success": "Successfully"}), 200
         else:
             return jsonify({"error": "User is already registered"})
+    elif request.method == GET:
+        user_json = request.json
+        user_or_name = user_json["email"]
+        password = user_json["password"]
+
+        if is_valid_email(user_or_name):
+            user = User.objects(email=user_or_name, password=password).first()
+            if user is not None:
+                return jsonify({"error": "User not found, check your information"})
+            else:
+                return jsonify({"success": "Successfully, logged", "user_id": str(user.pk)})
+        else:
+            return jsonify({"error": "User not found, check your information"})
+
 
 def send_request(URL, method, json):
     result = {}
@@ -113,7 +142,6 @@ def global_handler_file_doesnt_exist(e):
 @app.errorhandler(BadRequest)
 def global_handler_bad_request(e):
     return jsonify({"error": 401, "message": str(e)})
-
 
 
 @app.route('/')
