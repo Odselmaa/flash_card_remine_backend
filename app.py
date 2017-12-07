@@ -73,7 +73,7 @@ def collection():
 
 def is_valid_email(email):
     if len(email) > 7:
-        if re.match("^.+@([?)[a-zA-Z0-9-.]+.([a-zA-Z]{2,3}|[0-9]{1,3})(]?)$", email) != None:
+        if re.match("^.+@([?)[a-zA-Z0-9-.]+.([a-zA-Z]{2,3}|[0-9]{1,3})(]?)$)", email) != None:
             return True
     return False
 
@@ -95,14 +95,15 @@ def user():
             return jsonify({"user_id": str(user.pk), "success": "Successfully"}), 200
         else:
             return jsonify({"error": "User is already registered"})
-    elif request.method == GET:
+    elif request.method == "GET":
         user_json = request.json
         user_or_name = user_json["email"]
         password = user_json["password"]
-
+        # user_or_name = request.args.get("email")
+        # password = request.args.get("password")
         if is_valid_email(user_or_name):
             user = User.objects(email=user_or_name, password=password).first()
-            if user is None:
+            if user==None:
                 return jsonify({"error": "User not found, check your information"})
             else:
                 return jsonify({"success": "Successfully, logged", "user_id": str(user.pk)})
