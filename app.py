@@ -106,7 +106,7 @@ def user():
             if user == None:
                 return jsonify({"error": "User not found, check your information"})
             else:
-                return jsonify({"success": "Successfully, logged", "user_id": str(user.pk)})
+                return jsonify({"success": "Successfully, logged", "user_id": str(user.pk), "user":user.to_json()})
         else:
             return jsonify({"error": "User not found, check your information"})
 
