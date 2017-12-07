@@ -96,14 +96,14 @@ def user():
         else:
             return jsonify({"error": "User is already registered"})
     elif request.method == "GET":
-        user_json = request.json
-        user_or_name = user_json["email"]
-        password = user_json["password"]
-        # user_or_name = request.args.get("email")
-        # password = request.args.get("password")
+        # user_json = request.json
+        # user_or_name = user_json["email"]
+        # password = user_json["password"]
+        user_or_name = request.args.get("email")
+        password = request.args.get("password")
         if is_valid_email(user_or_name):
             user = User.objects(email=user_or_name, password=password).first()
-            if user==None:
+            if user == None:
                 return jsonify({"error": "User not found, check your information"})
             else:
                 return jsonify({"success": "Successfully, logged", "user_id": str(user.pk)})
