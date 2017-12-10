@@ -58,18 +58,33 @@ def collection():
         return collection
     elif request.method == POST:
         data = request.json
-        print(data)
-        # collection = data['collection']
-        # collection = Collection(**collection)
+        user_id = data["user_id"]
+
+        items = data['collections']
+        response = []
+        for item in items:
+            collection = item["collection"]
+            cards = item["cards"]
+
+
+            card_ids = [card.pop("id") for card in cards]
+            card_remote_ids = add_card(cards)
+            card_ids = dict(zip(card_ids, card_remote_ids))
+
+
+            tmp = {"coll_id":collection.pop("id")}
+            collection = Collection(**collection)
+            collection.cards = card_remote_ids
+            tmp["cards"] = card_ids
+            response.append(tmp)
         # cards = data['cards']
-        # card_ids = add_card(cards)
         # collection.cards = card_ids
         # collection.save()
 
         # user_id = data["user_id"]
         # updated = User.objects(id=ObjectId(user_id)).update_one(push__collections=collection.pk)
         # return jsonify({"collection_id": str(collection.pk), "update": updated})
-        return jsonify({"collection_id":  "update"})
+        return jsonify(response)
 
 
 def is_valid_email(email):
