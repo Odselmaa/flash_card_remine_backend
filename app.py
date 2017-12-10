@@ -36,7 +36,7 @@ def add_card(cards):
     cards_id = []
     for item in cards:
         card = Card(**item).save()
-        cards_id.append(card.pk)
+        cards_id.append(str(card.pk))
     return cards_id
 
 
@@ -75,6 +75,7 @@ def collection():
             tmp = {"coll_id":collection.pop("id")}
             collection = Collection(**collection)
             collection.cards = card_remote_ids
+
             tmp["cards"] = card_ids
             response.append(tmp)
         # cards = data['cards']
