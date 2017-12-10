@@ -36,7 +36,7 @@ def add_card(cards):
     cards_id = []
     for item in cards:
         card = Card(**item).save()
-        cards_id.append(str(card.pk))
+        cards_id.append(card.pk)
     return cards_id
 
 
@@ -66,17 +66,17 @@ def collection():
             collection = item["collection"]
             cards = item["cards"]
 
-
             card_ids = [card.pop("id") for card in cards]
             card_remote_ids = add_card(cards)
-            card_ids = dict(zip(card_ids, card_remote_ids))
-
+            card_ids = dict(zip(card_ids, [str(_id) for _id in card_remote_ids]))
 
             tmp = {"coll_id":collection.pop("id")}
             collection = Collection(**collection)
             collection.cards = card_remote_ids
             collection = collection.save()
-            tmp = {"remote_id": str(collection.pk)}
+
+            updated = User.objects(id=user_id).update_one(push__collections=collection.pk)
+            tmp["remote_id"] = str(collection.pk)
             tmp["cards"] = card_ids
             response.append(tmp)
         # cards = data['cards']
@@ -150,18 +150,21 @@ def str2objectid(id_list):
 
 @app.errorhandler(InternalServerError)
 def global_handler_500(e):
-    return jsonify({"error": "500", "message": str(e)}), 500
+    return jsonify({"error": 500, "message": str(e)}), 500
 
 
 @app.errorhandler(FieldDoesNotExist)
 def global_handler_file_doesnt_exist(e):
-    return jsonify({"error": 400, "message": str(e)})
+    return jsonify({"error": 400, "message": str(e)}), 400
 
 
 @app.errorhandler(BadRequest)
 def global_handler_bad_request(e):
-    return jsonify({"error": 401, "message": str(e)})
+    return jsonify({"error": 401, "message": str(e)}), 401
 
+@app.errorhandler(Exception)
+def global_handler_exception(e):
+    return jsonify({"error": "error", "message": str(e)}), 500
 
 @app.route('/')
 def index():
