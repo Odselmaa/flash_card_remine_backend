@@ -75,7 +75,8 @@ def collection():
             tmp = {"coll_id":collection.pop("id")}
             collection = Collection(**collection)
             collection.cards = card_remote_ids
-
+            collection = collection.save()
+            tmp = {"remote_id": str(collection.pk)}
             tmp["cards"] = card_ids
             response.append(tmp)
         # cards = data['cards']
