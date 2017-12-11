@@ -54,9 +54,9 @@ def card():
 @app.route('/collection', methods=[POST, GET, DELETE, PUT])
 def collection():
     if request.method == GET:
-        data = request.json
+        
 
-        if not "search_text" in data:
+        if "search_text" in request.args:
             print(search_text)
         # collection = Collection.objects.to_json()
         # return collection
