@@ -56,9 +56,10 @@ def collection():
     if request.method == GET:
         
         search_keyword = request.args.get("search_text", None)
+        user_id = request.args.get("user_id", None)
         response = []
-        if search_keyword != None:
-            collections = Collection.objects.search_text(search_keyword).exclude("cover")
+        if search_keyword != None and user_id != None:
+            collections = Collection.objects(user_id__ne=user_id).search_text(search_keyword).exclude("cover")
             # print(collection.to_json())
             for collection in collections:
                 tmp = json.loads(collection.to_json())
@@ -87,6 +88,7 @@ def collection():
 
             collection = Collection(**collection)
             collection.cards = card_remote_ids
+            collection.user_id = user_id
             collection = collection.save()
 
             # updated = User.objects(id=user_id).update_one(push__collections=collection.pk)
@@ -125,7 +127,7 @@ def user():
         if len(User.objects(email=user_json["email"])) == 0:
             user = User(**user_json)
             user.save()
-            return jsonify({"user_id": str(user.pk), "success": "Successfully"}), 200
+            return jsonify({"user_id": str(user.pk), "success": "Successfully"})
         else:
             return jsonify({"error": "User is already registered"})
     elif request.method == "GET":
