@@ -59,7 +59,7 @@ def collection():
         user_id = request.args.get("user_id", None)
         response = []
         if search_keyword != None and user_id != None:
-            collections = Collection.objects(user_id__ne=user_id).search_text(search_keyword).exclude("cover")
+            collections = Collection.objects(user_id__ne=user_id).search_text(search_keyword)
             # print(collection.to_json())
             for collection in collections:
                 tmp = json.loads(collection.to_json())
