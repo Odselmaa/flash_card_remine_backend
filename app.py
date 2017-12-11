@@ -54,30 +54,38 @@ def card():
 @app.route('/collection', methods=[POST, GET, DELETE, PUT])
 def collection():
     if request.method == GET:
-        collection = Collection.objects.to_json()
-        return collection
+        data = request.json
+
+        if not "search_text" in data:
+            print(search_text)
+        # collection = Collection.objects.to_json()
+        # return collection
+        return jsonify({"success":"Hey there!"})
+
     elif request.method == POST:
         data = request.json
         user_id = data["user_id"]
 
-        items = data['collections']
+        items = data["collections"]
         response = []
         for item in items:
             collection = item["collection"]
             cards = item["cards"]
 
-            card_ids = [card.pop("id") for card in cards]
+            card_ids = [int(card.pop("id")) for card in cards]
             card_remote_ids = add_card(cards)
-            card_ids = dict(zip(card_ids, [str(_id) for _id in card_remote_ids]))
+            card_list = dict(zip(card_ids, [str(_id) for _id in card_remote_ids]))
 
             tmp = {"coll_id":collection.pop("id")}
+
             collection = Collection(**collection)
             collection.cards = card_remote_ids
             collection = collection.save()
 
             updated = User.objects(id=user_id).update_one(push__collections=collection.pk)
+
             tmp["remote_id"] = str(collection.pk)
-            tmp["cards"] = card_ids
+            tmp["cards"] = card_list
             response.append(tmp)
         # cards = data['cards']
         # collection.cards = card_ids
