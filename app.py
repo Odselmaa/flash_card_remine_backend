@@ -66,7 +66,7 @@ def collection():
                 tmp["_id"] = tmp["_id"]["$oid"]
                 tmp["cards"] = len(collection.cards)
 
-                user = User.objects(id=ObjectId(collection.user_id)).only("name").first()
+                user = User.objects(id=ObjectId(collection.user_id)).only("name").exclude("favorites").first()
                 user = json.loads(user.to_json())
                 user["_id"] = user["_id"]["$oid"]
                 tmp["user"] = user
