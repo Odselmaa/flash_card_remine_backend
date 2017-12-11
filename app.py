@@ -65,7 +65,15 @@ def collection():
                 tmp = json.loads(collection.to_json())
                 tmp["_id"] = tmp["_id"]["$oid"]
                 tmp["cards"] = len(collection.cards)
+
+                user = User.objects(id=ObjectId(collection.user_id)).only("name").first()
+                user = json.loads(user.to_json())
+                user["_id"] = user["_id"]["$oid"]
+                tmp["user"] = user
                 response.append(tmp)
+
+
+
             return jsonify({"collections":response})
         else:
             raise jsonify({"error":"Bad keyword!"})
