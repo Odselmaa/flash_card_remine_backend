@@ -18,7 +18,7 @@ class Collection(Document):
     cards = ListField(ReferenceField(Card))
     cover = StringField()
     likes = IntField(default = 0)
-    user_id = ReferenceField(User)
+    user_id = StringField()
 
 
 class User(Document):
