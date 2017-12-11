@@ -17,13 +17,16 @@ class Collection(Document):
     description = StringField(required=True)
     cards = ListField(ReferenceField(Card))
     cover = StringField()
+    likes = IntField(default = 0)
+    user_id = ReferenceField(User)
 
 
 class User(Document):
-    name = StringField(required=True)
+
+    name = StringField()
     password = StringField()
     email = EmailField(required=True)
     favorites = ListField(ReferenceField(Collection))
-    collections = ListField(ReferenceField(Collection))
+    # collections = ListField(ReferenceField(Collection))
 
 

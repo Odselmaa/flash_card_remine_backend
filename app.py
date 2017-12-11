@@ -55,12 +55,19 @@ def card():
 def collection():
     if request.method == GET:
         
-
-        if "search_text" in request.args:
-            print(search_text)
-        # collection = Collection.objects.to_json()
-        # return collection
-        return jsonify({"success":"Hey there!"})
+        search_keyword = request.args.get("search_text", None)
+        response = []
+        if search_keyword != None:
+            collections = Collection.objects.search_text(search_keyword).exclude("cover")
+            # print(collection.to_json())
+            for collection in collections:
+                tmp = json.loads(collection.to_json())
+                tmp["_id"] = tmp["_id"]["$oid"]
+                tmp["cards"] = len(collection.cards)
+                response.append(tmp)
+            return jsonify({"collections":response})
+        else:
+            raise jsonify({"error":"Bad keyword!"})
 
     elif request.method == POST:
         data = request.json
@@ -82,7 +89,7 @@ def collection():
             collection.cards = card_remote_ids
             collection = collection.save()
 
-            updated = User.objects(id=user_id).update_one(push__collections=collection.pk)
+            # updated = User.objects(id=user_id).update_one(push__collections=collection.pk)
 
             tmp["remote_id"] = str(collection.pk)
             tmp["cards"] = card_list
