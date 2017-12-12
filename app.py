@@ -74,7 +74,7 @@ def collection():
                 user["_id"] = user["_id"]["$oid"]
                 tmp["user"] = user
                 response.append(tmp)
-            return jsonify({"collections": collection})
+            return jsonify({"collections": response})
 
         elif remote_id != None:
             collection = Collection.objects(id=ObjectId(remote_id)).first()
