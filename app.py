@@ -77,7 +77,7 @@ def collection():
             return jsonify({"collections": response})
 
         elif remote_id != None:
-            collection = Collection.objects(id=ObjectId(remote_id)).exlude('_id').first()
+            collection = Collection.objects(id=ObjectId(remote_id)).exclude('_id').first()
             cards = collection.cards
             return jsonify({"cards": cards})
         else:
