@@ -7,7 +7,8 @@ from werkzeug.exceptions import InternalServerError, BadRequest
 from models import db, Card, Collection, User
 import requests
 import re
-
+import jwt
+import uuid
 app = Flask(__name__)
 POST = "POST"
 GET = "GET"
@@ -54,9 +55,10 @@ def card():
 @app.route('/collection', methods=[POST, GET, DELETE, PUT])
 def collection():
     if request.method == GET:
-        
+
         search_keyword = request.args.get("search_text", None)
         user_id = request.args.get("user_id", None)
+        remote_id = request.args.get("remote_id", None)
         response = []
         if search_keyword != None and user_id != None:
             collections = Collection.objects(user_id__ne=user_id).search_text(search_keyword)
@@ -71,17 +73,18 @@ def collection():
                 user["_id"] = user["_id"]["$oid"]
                 tmp["user"] = user
                 response.append(tmp)
+            return jsonify({"collections": collection})
 
-
-
-            return jsonify({"collections":response})
+        elif remote_id != None:
+            collection = Collection.objects(id=ObjectId(remote_id)).first()
+            cards = collection.cards
+            return jsonify({"cards": cards})
         else:
-            raise jsonify({"error":"Bad keyword!"})
+            raise jsonify({"error": "Bad keyword!"})
 
     elif request.method == POST:
         data = request.json
         user_id = data["user_id"]
-
         items = data["collections"]
         response = []
         for item in items:
@@ -92,7 +95,7 @@ def collection():
             card_remote_ids = add_card(cards)
             card_list = dict(zip(card_ids, [str(_id) for _id in card_remote_ids]))
 
-            tmp = {"coll_id":collection.pop("id")}
+            tmp = {"coll_id": collection.pop("id")}
 
             collection = Collection(**collection)
             collection.cards = card_remote_ids
@@ -131,25 +134,25 @@ def is_valid_email(email):
 @app.route('/user', methods=[POST, GET])
 def user():
     if request.method == POST:
-        user_json = request.json
+        encoded_jwt = request.json["data"]
+        user_json = jwt.decode(encoded_jwt, 'ISHERLOCKED', algorithms=['HS256'])
+
         if len(User.objects(email=user_json["email"])) == 0:
+            user_json["access_token"] = jwt.encode({'access_token': str(uuid.uuid4())}, 'ISHERLOCKED', algorithm='HS256').decode("utf-8")
             user = User(**user_json)
             user.save()
-            return jsonify({"user_id": str(user.pk), "success": "Successfully"})
+            return jsonify({"user_id": str(user.pk), "success": "Successfully", "access_token": user_json["access_token"]})
         else:
             return jsonify({"error": "User is already registered"})
     elif request.method == "GET":
-        # user_json = request.json
-        # user_or_name = user_json["email"]
-        # password = user_json["password"]
         user_or_name = request.args.get("email")
-        password = request.args.get("password")
+        # password = request.args.get("password")
         if is_valid_email(user_or_name):
-            user = User.objects(email=user_or_name, password=password).first()
+            user = User.objects(email=user_or_name).first()
             if user == None:
                 return jsonify({"error": "User not found, check your information"})
             else:
-                return jsonify({"success": "Successfully, logged", "user_id": str(user.pk), "user":user.to_json()})
+                return jsonify({"success": "Successfully, logged", "user_id": str(user.pk), "user": user.to_json()})
         else:
             return jsonify({"error": "User not found, check your information"})
 
@@ -187,9 +190,11 @@ def global_handler_file_doesnt_exist(e):
 def global_handler_bad_request(e):
     return jsonify({"error": 401, "message": str(e)}), 401
 
+
 @app.errorhandler(Exception)
 def global_handler_exception(e):
     return jsonify({"error": "error", "message": str(e)}), 500
+
 
 @app.route('/')
 def index():
