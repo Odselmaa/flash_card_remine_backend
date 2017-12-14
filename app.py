@@ -59,8 +59,9 @@ def collection():
         search_keyword = request.args.get("search_text", None)
         user_id = request.args.get("user_id", None)
         remote_id = request.args.get("remote_id", None)
-        response = []
         if search_keyword != None and user_id != None:
+            response = []
+
             collections = Collection.objects(user_id__ne=user_id).search_text(search_keyword)
             # print(collection.to_json())
             for collection in collections:
@@ -103,18 +104,9 @@ def collection():
             collection.user_id = user_id
             collection = collection.save()
 
-            # updated = User.objects(id=user_id).update_one(push__collections=collection.pk)
-
             tmp["remote_id"] = str(collection.pk)
             tmp["cards"] = card_list
             response.append(tmp)
-        # cards = data['cards']
-        # collection.cards = card_ids
-        # collection.save()
-
-        # user_id = data["user_id"]
-        # updated = User.objects(id=ObjectId(user_id)).update_one(push__collections=collection.pk)
-        # return jsonify({"collection_id": str(collection.pk), "update": updated})
         return jsonify(response)
 
 
@@ -123,13 +115,6 @@ def is_valid_email(email):
         if re.match("^.+@([?)[a-zA-Z0-9-.]+.([a-zA-Z]{2,3}|[0-9]{1,3})(]?)$)", email) != None:
             return True
     return False
-
-    # if isValidEmail("my.email@gmail.com") == True:
-    #     print
-    #     "This is a valid email address"
-    # else:
-    #     print
-    #     "This is not a valid email address"
 
 
 @app.route('/user', methods=[POST, GET])
@@ -142,6 +127,7 @@ def user():
             user_json["access_token"] = jwt.encode({'access_token': str(uuid.uuid4())}, 'ISHERLOCKED', algorithm='HS256').decode("utf-8")
             user = User(**user_json)
             user.save()
+
             return jsonify({"user_id": str(user.pk), "success": "Successfully", "access_token": user_json["access_token"]})
         else:
             return jsonify({"error": "User is already registered"})
@@ -153,7 +139,19 @@ def user():
             if user == None:
                 return jsonify({"error": "User not found, check your information"})
             else:
-                return jsonify({"success": "Successfully, logged", "user_id": str(user.pk), "user": user.to_json()})
+
+                response = []
+                collections = Collection.objects(user_id=str(user.id)).exclude("user_id")
+                for collection in collections:
+                    tmp = json.loads(collection.to_json())
+                    tmp["_id"] = tmp["_id"]["$oid"]
+                    print(jsonify({"cards": collection.cards }))
+                    tmp["cards"] = collection.cards
+                    response.append(tmp)
+                return jsonify({"success": "Successfully, logged", 
+                                "user_id": str(user.pk), 
+                                "user": user, 
+                                "collection": response})
         else:
             return jsonify({"error": "User not found, check your information"})
 
