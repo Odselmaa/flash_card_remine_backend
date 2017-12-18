@@ -26,7 +26,7 @@ class User(Document):
     name = StringField()
     password = StringField()
     email = EmailField(required=True)
-    favorites = ListField(ReferenceField(Collection))
+    favorites = ListField(StringField())
     profile = StringField()
     access_token = StringField()
     # collections = ListField(ReferenceField(Collection))
