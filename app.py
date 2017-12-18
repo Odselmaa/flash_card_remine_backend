@@ -138,14 +138,13 @@ def collection():
                     Collection.objects(id=ObjectId(coll)).update_one(dec__likes=1)
             
             user.favorites = favorites
-            user.update()
+            user.save()
 
             updated_collection = {}
             for favorite in favorites:
                 collection = Collection.objects(id=ObjectId(favorite)).first()
-                # collection.likes += 1
-                collection.update(inc__likes = 1)
-                collection.reload()  
+                collection.likes += 1
+                collection.save() 
                 updated_collection[favorite] = collection.likes
             return jsonify({"test":updated_collection})
 
