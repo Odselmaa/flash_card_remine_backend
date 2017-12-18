@@ -128,8 +128,16 @@ def collection():
 
             return jsonify({"test":"test"})
 
-        elif "favorite" in data:
-            return jsonify({"test":data})
+        elif "favorite" in data and "user_id" in data:
+            favorites = data["favorite"]
+            user_id = data["user_id"]
+            updated_user = User.objects(id=ObjectId(user_id)).update_one(favorites=favorites)
+            updated_collection = {}
+            for favorite in favorites:
+                collection = Collection.objects(id=ObjectId(favorite)).first()
+                collection.update_one(inc__likes=1)  
+                updated_collection[favorite] = collection.likes
+            return jsonify({"test":updated_collection})
 
 
 
