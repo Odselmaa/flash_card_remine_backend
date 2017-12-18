@@ -143,8 +143,9 @@ def collection():
             updated_collection = {}
             for favorite in favorites:
                 collection = Collection.objects(id=ObjectId(favorite)).first()
-                collection.likes += 1
-                collection.update()  
+                # collection.likes += 1
+                collection.update(inc__likes = 1)
+                collection.reload()  
                 updated_collection[favorite] = collection.likes
             return jsonify({"test":updated_collection})
 
