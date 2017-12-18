@@ -136,16 +136,20 @@ def collection():
             for coll in user.favorites:
                 if coll not in favorites:
                     Collection.objects(id=ObjectId(coll)).update_one(dec__likes=1)
-            
-            user.favorites = favorites
-            user.save()
+                
+
+
 
             updated_collection = {}
             for favorite in favorites:
-                collection = Collection.objects(id=ObjectId(favorite)).first()
-                collection.likes += 1
-                collection.save() 
-                updated_collection[favorite] = collection.likes
+                if favorite not in user.favorites:
+                    collection = Collection.objects(id=ObjectId(favorite)).first()
+                    collection.likes += 1
+                    collection.save() 
+                    updated_collection[favorite] = collection.likes
+
+            user.favorites = favorites
+            user.save()
             return jsonify({"test":updated_collection})
 
 
