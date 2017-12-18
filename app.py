@@ -61,15 +61,12 @@ def collection():
         remote_id = request.args.get("remote_id", None)
         if search_keyword != None and user_id != None:
             response = []
-
             collections = Collection.objects(user_id__ne=user_id).search_text(search_keyword)
-            # print(collection.to_json())
             for collection in collections:
                 tmp = json.loads(collection.to_json())
                 tmp["_id"] = tmp["_id"]["$oid"]
                 tmp["cards"] = len(collection.cards)
                 collection.cards = None
-
                 user = User.objects(id=ObjectId(collection.user_id)).only("name").exclude("favorites").first()
                 user = json.loads(user.to_json())
                 user["_id"] = user["_id"]["$oid"]
@@ -109,6 +106,32 @@ def collection():
             response.append(tmp)
         return jsonify(response)
 
+    elif request.method == PUT:
+        data = request.json
+        if "collections" in data:
+            user_id = data["user_id"]
+            items = data["collections"]
+            response = []
+            added_cards = {}
+            for item in items:
+                collection = item["collection"]
+                cards = item["cards"]
+                collection = Collection.objects(id=ObjectId(collection["remote_id"])).update(**collection)
+                
+                for card_item in cards:
+                    if "remote_id" in card:
+                        card = Card.objects(id=ObjectId(card["remote_id"])).update(**card)
+                    else:
+                        card = Card(**json)
+                        added_cards[card["id"]] = str(card.pk)
+
+
+            return jsonify({"test":"test"})
+
+        elif "favorite" in data:
+            return jsonify({"test":data})
+
+
 
 def is_valid_email(email):
     if len(email) > 7:
@@ -127,7 +150,6 @@ def user():
             user_json["access_token"] = jwt.encode({'access_token': str(uuid.uuid4())}, 'ISHERLOCKED', algorithm='HS256').decode("utf-8")
             user = User(**user_json)
             user.save()
-
             return jsonify({"user_id": str(user.pk), "success": "Successfully", "access_token": user_json["access_token"]})
         else:
             return jsonify({"error": "User is already registered"})
