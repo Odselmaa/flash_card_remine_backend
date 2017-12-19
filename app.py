@@ -212,15 +212,15 @@ def user():
                     tmp["favorited"] = False
                     response.append(tmp)
 
-                favorite_ids = user.favorites
-                for favorite_id in favorite_ids:
-                    collection = Collection.objects(id=ObjectId(favorite_id)).first()
-                    tmp = json.loads(collection.to_json())
-                    tmp["_id"] = tmp["_id"]["$oid"]
-                    tmp["cards"] = collection.cards
+                # favorite_ids = user.favorites
+                # for favorite_id in favorite_ids:
+                #     collection = Collection.objects(id=ObjectId(favorite_id)).first()
+                #     tmp = json.loads(collection.to_json())
+                #     tmp["_id"] = tmp["_id"]["$oid"]
+                #     tmp["cards"] = collection.cards
 
-                    tmp["favorited"] = True
-                    response.append(tmp)
+                #     tmp["favorited"] = True
+                #     response.append(tmp)
 
                 # trending_collection = Collection.objects.order_by("-likes").limit(10)
                 # for collection in trending_collection:
