@@ -59,6 +59,9 @@ def collection():
         search_keyword = request.args.get("search_text", None)
         user_id = request.args.get("user_id", None)
         remote_id = request.args.get("remote_id", None)
+        favorite = request.args.get("favorite", None)
+        limit = request.args.get("limit", None)
+
         if search_keyword != None and user_id != None:
             response = []
             collections = Collection.objects(user_id__ne=user_id).search_text(search_keyword)
@@ -78,6 +81,10 @@ def collection():
             collection = Collection.objects(id=ObjectId(remote_id)).first()
             cards = collection.cards
             return jsonify({"cards": cards})
+
+        # elif favorite != None and limit != None and user_id != None:
+        #     collection_ids = User.objects(id=ObjectId)
+
         else:
             raise jsonify({"error": "Bad keyword!"})
 
@@ -182,8 +189,18 @@ def user():
             if user == None:
                 return jsonify({"error": "User not found, check your information"})
             else:
-
                 response = []
+
+                trending_collection = Collection.objects.order_by("-likes").limit(10)    
+
+                favorite_ids = user.favorites
+                favorites = []
+                for favorite_id in favorite_ids:
+                    collection = Collection.objects(id=ObjectId(favorite_id)).first()
+                    tmp = json.loads(collection.to_json())
+                    tmp["_id"] = tmp["_id"]["$oid"]
+                    favorites.append(tmp)
+
                 collections = Collection.objects(user_id=str(user.id)).exclude("user_id")
                 for collection in collections:
                     tmp = json.loads(collection.to_json())
@@ -191,10 +208,13 @@ def user():
                     print(jsonify({"cards": collection.cards }))
                     tmp["cards"] = collection.cards
                     response.append(tmp)
+
                 return jsonify({"success": "Successfully, logged", 
                                 "user_id": str(user.pk), 
                                 "user": user, 
-                                "collection": response})
+                                "collection": response,
+                                "favorites": favorites,
+                                "trending": trending_collection})
         else:
             return jsonify({"error": "User not found, check your information"})
 
