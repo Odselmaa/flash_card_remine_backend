@@ -12,6 +12,7 @@ class Card(Document):
     translation = StringField(required=True)
     original = StringField(required=True)
 
+
 class Collection(Document):
     title = StringField(required=True)
     description = StringField(required=True)
@@ -19,6 +20,9 @@ class Collection(Document):
     cover = StringField()
     likes = IntField(default = 0)
     user_id = StringField()
+    
+    translation_lang = StringField()
+    original_lang = StringField()
 
 
 class User(Document):
