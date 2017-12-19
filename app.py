@@ -217,6 +217,8 @@ def user():
                     collection = Collection.objects(id=ObjectId(favorite_id)).first()
                     tmp = json.loads(collection.to_json())
                     tmp["_id"] = tmp["_id"]["$oid"]
+                    tmp["cards"] = collection.cards
+
                     tmp["favorited"] = True
                     response.append(tmp)
 
