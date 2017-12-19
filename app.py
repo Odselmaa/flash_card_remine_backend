@@ -210,7 +210,6 @@ def user():
                     tmp["_id"] = tmp["_id"]["$oid"]
                     tmp["cards"] = collection.cards
                     tmp["favorited"] = False
-                    tmp["trending"] = False
                     response.append(tmp)
 
                 favorite_ids = user.favorites
@@ -219,7 +218,6 @@ def user():
                     tmp = json.loads(collection.to_json())
                     tmp["_id"] = tmp["_id"]["$oid"]
                     tmp["favorited"] = True
-                    tmp["trending"] = False
                     response.append(tmp)
 
                 # trending_collection = Collection.objects.order_by("-likes").limit(10)
