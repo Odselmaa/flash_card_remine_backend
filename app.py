@@ -189,9 +189,6 @@ def user():
             if user == None:
                 return jsonify({"error": "User not found, check your information"})
             else:
-                response = []
-
-                trending_collection = Collection.objects.order_by("-likes").limit(10)    
 
                 favorite_ids = user.favorites
                 favorites = []
@@ -202,19 +199,29 @@ def user():
                     favorites.append(tmp)
 
                 collections = Collection.objects(user_id=str(user.id)).exclude("user_id")
+                response = []
+
                 for collection in collections:
                     tmp = json.loads(collection.to_json())
                     tmp["_id"] = tmp["_id"]["$oid"]
-                    print(jsonify({"cards": collection.cards }))
                     tmp["cards"] = collection.cards
+                    tmp["favorited"] = False
+                    response.append(tmp)
+
+                trending_collection = Collection.objects.order_by("-likes").limit(10)
+                for collection in trending_collection:
+
+                    tmp = json.loads(collection.to_json())
+                    tmp["_id"] = tmp["_id"]["$oid"]
+                    tmp["cards"] = collection.cards
+                    tmp["favorited"] = True
                     response.append(tmp)
 
                 return jsonify({"success": "Successfully, logged", 
                                 "user_id": str(user.pk), 
                                 "user": user, 
                                 "collection": response,
-                                "favorites": favorites,
-                                "trending": trending_collection})
+                                "favorites": favorites})
         else:
             return jsonify({"error": "User not found, check your information"})
 
