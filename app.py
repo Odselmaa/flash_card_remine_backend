@@ -167,6 +167,18 @@ def is_valid_email(email):
             return True
     return False
 
+def convert_collection(collections, trending=False, favorited=False):
+    response = []
+    for collection in collections:
+        tmp = json.loads(collection.to_json())
+        tmp["_id"] = tmp["_id"]["$oid"]
+        tmp["cards"] = collection.cards
+        tmp["favorited"] = trending
+        tmp["trending"] = favorited
+        response.append(tmp)
+    return response
+
+
 
 @app.route('/user', methods=[POST, GET])
 def user():
@@ -190,14 +202,6 @@ def user():
                 return jsonify({"error": "User not found, check your information"})
             else:
 
-                favorite_ids = user.favorites
-                favorites = []
-                for favorite_id in favorite_ids:
-                    collection = Collection.objects(id=ObjectId(favorite_id)).first()
-                    tmp = json.loads(collection.to_json())
-                    tmp["_id"] = tmp["_id"]["$oid"]
-                    favorites.append(tmp)
-
                 collections = Collection.objects(user_id=str(user.id)).exclude("user_id")
                 response = []
 
@@ -206,22 +210,31 @@ def user():
                     tmp["_id"] = tmp["_id"]["$oid"]
                     tmp["cards"] = collection.cards
                     tmp["favorited"] = False
+                    tmp["trending"] = False
                     response.append(tmp)
 
-                trending_collection = Collection.objects.order_by("-likes").limit(10)
-                for collection in trending_collection:
-
+                favorite_ids = user.favorites
+                for favorite_id in favorite_ids:
+                    collection = Collection.objects(id=ObjectId(favorite_id)).first()
                     tmp = json.loads(collection.to_json())
                     tmp["_id"] = tmp["_id"]["$oid"]
-                    tmp["cards"] = collection.cards
                     tmp["favorited"] = True
+                    tmp["trending"] = False
                     response.append(tmp)
+
+                # trending_collection = Collection.objects.order_by("-likes").limit(10)
+                # for collection in trending_collection:
+                #     tmp = json.loads(collection.to_json())
+                #     tmp["_id"] = tmp["_id"]["$oid"]
+                #     tmp["favorited"] = False
+                #     tmp["trending"] = True
+                #     tmp["cards"] = collection.cards
+                #     response.append(tmp)
 
                 return jsonify({"success": "Successfully, logged", 
                                 "user_id": str(user.pk), 
                                 "user": user, 
-                                "collection": response,
-                                "favorites": favorites})
+                                "collection": response})
         else:
             return jsonify({"error": "User not found, check your information"})
 
