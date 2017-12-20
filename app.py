@@ -59,12 +59,10 @@ def collection_trending():
         user_id = request.args.get("user_id", None)
         if limit is not None:
             trending_collection = Collection.objects.order_by("-likes").limit(limit).exclude("cards")
-            user = User.objects(id=ObjectId(user_id)).first()
             response = []
             for collection in trending_collection:
                 tmp = json.loads(collection.to_json())
                 tmp["_id"] = tmp["_id"]["$oid"]
-                tmp["favorited"] = tmp["_id"] in user.favorites
                 user = User.objects(id=ObjectId(collection.user_id)).only("name").exclude("favorites").first()
                 user = json.loads(user.to_json())
                 user["_id"] = user["_id"]["$oid"]
