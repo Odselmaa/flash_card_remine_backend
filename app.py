@@ -54,7 +54,7 @@ def card():
 
 @app.route('/collection/trending', methods=[GET])
 def collection_trending():
-    if request.methods == GET:
+    if request.method == GET:
         limit = request.args.get("limit", None)
         user_id = request.args.get("user_id", None)
         if limit is not None:
