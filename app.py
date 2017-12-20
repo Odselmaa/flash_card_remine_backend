@@ -65,6 +65,10 @@ def collection_trending():
                 tmp = json.loads(collection.to_json())
                 tmp["_id"] = tmp["_id"]["$oid"]
                 tmp["favorited"] = tmp["_id"] in user.favorites
+                user = User.objects(id=ObjectId(collection.user_id)).only("name").exclude("favorites").first()
+                user = json.loads(user.to_json())
+                user["_id"] = user["_id"]["$oid"]
+                tmp["user"] = user
                 response.append(tmp)
 
             return jsonify({"response": response})
