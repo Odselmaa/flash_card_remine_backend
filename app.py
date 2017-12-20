@@ -60,6 +60,7 @@ def collection_trending():
         if limit is not None:
             trending_collection = Collection.objects.order_by("-likes").limit(limit).exclude("cards")
             user = User.objects(id=ObjectId(user_id)).first()
+            response = []
             for collection in trending_collection:
                 tmp = json.loads(collection.to_json())
                 tmp["_id"] = tmp["_id"]["$oid"]
