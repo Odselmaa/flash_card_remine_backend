@@ -55,7 +55,7 @@ def card():
 @app.route('/collection/trending', methods=[GET])
 def collection_trending():
     if request.method == GET:
-        limit = request.args.get("limit", None)
+        limit = int(equest.args.get("limit", None))
         user_id = request.args.get("user_id", None)
         if limit is not None:
             trending_collection = Collection.objects.order_by("-likes").limit(limit).exclude("cards")
