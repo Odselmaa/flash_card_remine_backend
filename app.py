@@ -52,6 +52,25 @@ def card():
         return jsonify(cards_id)
 
 
+@app.route('/collection/trending', methods=[GET])
+def collection_trending():
+    if request.methods == GET:
+        limit = request.args.get("limit", None)
+        user_id = request.args.get("user_id", None)
+        if limit is not None:
+            trending_collection = Collection.objects.order_by("-likes").limit(limit).exclude("cards")
+            user = User.objects(id=ObjectId(user_id)).first()
+            for collection in trending_collection:
+                tmp = json.loads(collection.to_json())
+                tmp["_id"] = tmp["_id"]["$oid"]
+                tmp["favorited"] = tmp["_id"] in user.favorites
+                response.append(tmp)
+
+            return jsonify({"response": response})
+        else:
+            return jsonify({"error": "Bad keyword!"})
+ 
+
 @app.route('/collection', methods=[POST, GET, DELETE, PUT])
 def collection():
     if request.method == GET:
@@ -81,6 +100,8 @@ def collection():
             collection = Collection.objects(id=ObjectId(remote_id)).first()
             cards = collection.cards
             return jsonify({"cards": cards})
+
+
 
         # elif favorite != None and limit != None and user_id != None:
         #     collection_ids = User.objects(id=ObjectId)
@@ -201,7 +222,6 @@ def user():
             if user == None:
                 return jsonify({"error": "User not found, check your information"})
             else:
-
                 collections = Collection.objects(user_id=str(user.id)).exclude("user_id")
                 response = []
 
